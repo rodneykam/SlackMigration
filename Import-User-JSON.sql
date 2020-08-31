@@ -1,14 +1,24 @@
 USE slack_history
 
 Declare @JSON varchar(max)
+DECLARE @input_file NVARCHAR(MAX)
+DECLARE @sql nvarchar(MAX)
+DECLARE @ParmDefinition NVARCHAR(500)
 
+SET @input_file = 'C:\CHC-ClinicalNetwork Slack export Jul 2 2015 - Aug 28 2020\users.json'
+SET @sql = 'SELECT @JSON_OUT=BulkColumn FROM OPENROWSET (BULK ''' + @input_file + ''', SINGLE_CLOB) import'
+SET @ParmDefinition = N'@JSON_OUT NVARCHAR(MAX) OUTPUT'
+
+--
+-- Delete Table before creating a new one
+--
 IF OBJECT_ID('dbo.slack_user', 'U') IS NOT NULL 
   DROP TABLE dbo.slack_user; 
+
 --
--- Convert user.json file
+-- Migrate user.json file
 --
-SELECT @JSON=BulkColumn
-FROM OPENROWSET (BULK 'C:\CHC-ClinicalNetwork Slack export May 1 2020 - Aug 25 2020\users.json', SINGLE_CLOB) import
+EXEC sp_executesql @sql, @ParmDefinition, @JSON_OUT = @JSON OUTPUT;
 
 SELECT * INTO slack_user
 FROM OPENJSON (@JSON)
@@ -24,3 +34,5 @@ WITH
 	updated		BIGINT,
 	profile		NVARCHAR(MAX) AS JSON
 )
+
+PRINT 'Done!'
