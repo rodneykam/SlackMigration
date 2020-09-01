@@ -9,6 +9,7 @@ IF EXISTS
 GO
 
 CREATE PROCEDURE sp_insert_slack_messages
+	@channel_id NVARCHAR(50),
 	@input_file NVARCHAR(MAX)	
 AS
 BEGIN
@@ -26,6 +27,7 @@ EXEC sp_executesql @sql, @ParmDefinition, @JSON_OUT = @JSON OUTPUT;
 
 INSERT INTO slack_message 
 (
+	channel_id,
 	client_msg_id,
 	[type],
 	[text],
@@ -49,7 +51,7 @@ INSERT INTO slack_message
 	is_starred,
 	edited
 )
-SELECT *
+SELECT @channel_id, M.*
 FROM OPENJSON (@JSON)
 WITH (
     client_msg_id	NVARCHAR(50),
@@ -74,5 +76,5 @@ WITH (
 	reactions		NVARCHAR(MAX) AS JSON,
 	is_starred		BIT,
 	edited			NVARCHAR(MAX) AS JSON
-)
+) M
 END

@@ -17,6 +17,7 @@ IF OBJECT_ID('dbo.slack_message', 'U') IS NOT NULL
   
 CREATE TABLE slack_message
 (
+	channel_id		NVARCHAR(50),
     client_msg_id	NVARCHAR(50),
 	[type]			NVARCHAR(10),
 	[text]			NVARCHAR(MAX),
